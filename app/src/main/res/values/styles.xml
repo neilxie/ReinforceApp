@@ -1,0 +1,64 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="app_theme" parent="@android:style/Theme">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+    </style>
+
+    <!--<style name="Animation_Activity" parent="@android:style/Animation.Translucent">-->
+        <!--<item name="android:activityOpenEnterAnimation">@anim/slide_right_in</item>-->
+        <!--<item name="android:activityOpenExitAnimation">@anim/slide_left_out</item>-->
+        <!--<item name="android:activityCloseEnterAnimation">@anim/slide_left_in</item>-->
+        <!--<item name="android:activityCloseExitAnimation">@anim/slide_right_out</item>-->
+    <!--</style>-->
+
+    <!--<style name="AppTheme" parent="@android:style/Theme.Black.NoTitleBar">-->
+        <!--<item name="android:windowBackground">@drawable/activity_default_bg</item>-->
+        <!--<item name="android:windowAnimationStyle">@style/Animation_Activity</item>-->
+    <!--</style>-->
+
+    <!--<style name="AppFullScreenTheme" parent="@android:style/Theme.Black.NoTitleBar">-->
+        <!--<item name="android:windowIsTranslucent">true</item>-->
+    <!--</style>-->
+    <!--<style name="HaiTun_PaymentActTheme" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar">-->
+        <!--<item name="android:windowBackground">@android:color/transparent</item>-->
+        <!--<item name="android:windowIsTranslucent">true</item>-->
+        <!--<item name="android:background">@android:color/transparent</item>-->
+    <!--</style>-->
+
+    <!--<style name="zy_pay_dialog_style">-->
+        <!--<item name="android:windowBackground">@android:color/transparent</item>-->
+        <!--<item name="android:windowFrame">@null</item>-->
+        <!--<item name="android:windowNoTitle">true</item>-->
+        <!--<item name="android:windowIsTranslucent">false</item>-->
+        <!--<item name="android:windowFullscreen">true</item>-->
+        <!--<item name="android:backgroundDimEnabled">true</item>-->
+    <!--</style>-->
+
+    <!--<style name="lttransparent" parent="@android:style/Theme.Dialog">-->
+        <!--<item name="android:windowBackground">@color/lt_transparent_background</item>-->
+        <!--<item name="android:windowNoTitle">true</item>-->
+        <!--<item name="android:windowIsTranslucent">true</item>-->
+        <!--<item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>-->
+        <!--<item name="android:windowFullscreen">true</item>-->
+    <!--</style>-->
+
+    <!--<style name="lebian_main_app_theme" parent="@android:style/Theme.NoTitleBar.Fullscreen">-->
+        <!--<item name="android:windowFrame">@null</item>-->
+        <!--<item name="android:windowNoTitle">true</item>-->
+        <!--<item name="android:windowIsFloating">false</item>-->
+        <!--<item name="android:windowIsTranslucent">false</item>-->
+        <!--<item name="android:windowContentOverlay">@null</item>-->
+        <!--<item name="android:windowAnimationStyle">@null</item>-->
+        <!--<item name="android:colorBackgroundCacheHint">@null</item>-->
+    <!--</style>-->
+
+    <!--<style name="lebian_activity_proxy" parent="@android:style/Theme.NoTitleBar.Fullscreen" />-->
+    <!--<style name="lebian_activity_proxy_t" parent="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />-->
+
+</resources>
