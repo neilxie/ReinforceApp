@@ -44,19 +44,20 @@ public class Main {
         shellPack.changeVersion(gameInfo.versionCode, gameInfo.versionName);
 
         // encrypt game apk and copy to shell apk assets directory
-//        encryptGameApk();
+        System.out.println("------encrypt game apk and copy to shell apk assets directory-----");
+        encryptGameApk();
 
         // read channel list
 
-        // change channel id in shell apk
+        // change channel id in shell apks
 
         // repack shell apk
         System.out.println("------repack shell apk-----");
         shellPack.repackShell();
 
         // encrypt game apk and write encrypted apk to shell dex file
-        System.out.println("------encrypt game apk and write encrypted apk to shell dex file-----");
-        shellPack.copyGameApkToDex();
+//        System.out.println("------encrypt game apk and write encrypted apk to shell dex file-----");
+//        shellPack.copyGameApkToDex();
 
         // sign shell apk
         System.out.println("------sign shell apk-----");
