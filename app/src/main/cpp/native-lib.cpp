@@ -18,9 +18,9 @@ void Java_com_jd_apploader_App_onAppCreate(JNIEnv *env, jobject obj, jobject app
         if(appName == NULL) {
             return;
         } else {
-            char *apkfile = GetApkFileName(GetApkFilePath(env, app));
+//            char *apkfile = GetApkFileName(GetApkFilePath(env, app));
 
-            gameApp = createGameApplication(env, appName, env->NewStringUTF(apkfile));
+            gameApp = createGameApplication(env, appName, env->NewStringUTF(apkFileName));
         }
     }
 
@@ -54,6 +54,11 @@ void Java_com_jd_apploader_App_onAppCreate(JNIEnv *env, jobject obj, jobject app
     jclass clsApplication = env->FindClass("android/app/Application");
     jmethodID onCreate = env->GetMethodID(clsApplication, "onCreate", "()V");
     env->CallVoidMethod(gameApp, onCreate);
+
+    env->ReleaseStringUTFChars(jPackageName, packageName);
+    free(apkFilePath);
+    free(apkLibPath);
+    free(apkFileName);
 
 }
 
@@ -90,7 +95,8 @@ jobject createGameApplication(JNIEnv *env, jstring appName, jstring apkFileName)
     jfieldID appBindAppInfoId = env->GetFieldID(clsAppBindData, "appInfo", "Landroid/content/pm/ApplicationInfo;");
     jobject appInfo = env->GetObjectField(mBoundApplication, appBindAppInfoId);
 
-    LOGE("createGameApplication app name: %s", Jstring2CStr(env, appName));
+//    LOGE("createGameApplication app name: %s", Jstring2CStr(env, appName));
+//    LOGE("createGameApplication app name: %s", env->GetStringUTFChars(appName, false));
 //    jstring appClsName = env->NewStringUTF("com.duole.PetGame.CmgameApplication");
     jclass clsAppInfo = env->FindClass("android/content/pm/ApplicationInfo");
     jfieldID clsNameId = env->GetFieldID(clsAppInfo, "className", "Ljava/lang/String;");
@@ -117,13 +123,13 @@ jobject createGameApplication(JNIEnv *env, jstring appName, jstring apkFileName)
 char* Jstring2CStr(JNIEnv *env, jstring jstr) {
     char* rtn = NULL;
     jclass clsstring = env->FindClass("java/lang/String");
-    jstring strencode = env->NewStringUTF("GB2312");
+    jstring strencode = env->NewStringUTF("utf-8");
     jmethodID mid = env->GetMethodID(clsstring, "getBytes", "(Ljava/lang/String;)[B");
     jbyteArray barr = (jbyteArray) env->CallObjectMethod(jstr, mid, strencode);
     jsize len = env->GetArrayLength(barr);
     jbyte *ba = env->GetByteArrayElements(barr, JNI_FALSE);
     if(len > 0) {
-        rtn = (char *) malloc(len + 1);
+        rtn = (char *) malloc(len);
         memcpy(rtn, ba, len);
         rtn[len] = 0;
     }
@@ -149,42 +155,53 @@ jstring GetPackageName(JNIEnv *env, jobject app) {
     return packageName;
 }
 
+void InitPackageName(JNIEnv *env, jobject app) {
+    jPackageName = GetPackageName(env, app);
+    packageName = (char *) env->GetStringUTFChars(jPackageName, false);
+//    packageName = Jstring2CStr(env, GetPackageName(env, app));
+    LOGD("package name: %s", packageName);
+}
+
 char* GetDexFilePath(JNIEnv *env, jobject app) {
     const char* root = "/data/data/";
-    char* package = Jstring2CStr(env, GetPackageName(env, app));
+//    char* package = Jstring2CStr(env, GetPackageName(env, app));
     const char* path = "/files/dex/";
 
-    int len = strlen(root) + strlen(package) + strlen(path) + 1;
+    int len = strlen(root) + strlen(packageName) + strlen(path) + 1;
     char *buf = (char *) malloc(len);
     buf[len] = 0;
-    sprintf(buf, "%s%s%s", root, package, path);
+    sprintf(buf, "%s%s%s", root, packageName, path);
     LOGD("dex file path: %s", buf);
-    free(package);
+//    free(package);
 
     return buf;
 }
 
 char* GetApkFilePath(JNIEnv *env, jobject app) {
     const char* root = "/data/data/";
-    char* package = Jstring2CStr(env, GetPackageName(env, app));
+//    char* package = Jstring2CStr(env, GetPackageName(env, app));
     const char* path = "/files/apkFile/";
 
-    int len = strlen(root) + strlen(package) + strlen(path) + 1;
+    int rootLen = strlen(root);
+    int packageLen = strlen(packageName);
+    int pathLen = strlen(path);
+    int len = rootLen + packageLen + pathLen;
     char *buf = (char *) malloc(len);
+    sprintf(buf, "%s%s%s", root, packageName, path);
     buf[len] = 0;
-    sprintf(buf, "%s%s%s", root, package, path);
     LOGD("apk file path: %s", buf);
-    free(package);
+//    free(package);
 
     return buf;
 }
 
 char* GetApkFileName(const char *apkFilePath) {
     const char* decryptFileName = "loader.apk";
-    int len = strlen(apkFilePath) + strlen(decryptFileName) + 1;
-    char *apkFileName = (char *) malloc(len);
-    apkFileName[len] = 0;
+    int len = strlen(apkFilePath) + strlen(decryptFileName);
+    char *apkFileName = (char *) malloc(len + 1);
+
     sprintf(apkFileName, "%s%s", apkFilePath, decryptFileName);
+    apkFileName[len] = 0;
     LOGD("apk file: %s", apkFileName);
 
     return apkFileName;
@@ -192,14 +209,14 @@ char* GetApkFileName(const char *apkFilePath) {
 
 char* GetApkLibPath(JNIEnv *env, jobject app) {
     const char* root = "/data/data/";
-    char* package = Jstring2CStr(env, GetPackageName(env, app));
+//    char* package = Jstring2CStr(env, GetPackageName(env, app));
     const char* path = "/files/apkLib/";
-    int len = strlen(root) + strlen(package) + strlen(path) + 1;
-    char *buf = (char *) malloc(len);
+    int len = strlen(root) + strlen(packageName) + strlen(path);
+    char *buf = (char *) malloc(len + 1);
+    sprintf(buf, "%s%s%s", root, packageName, path);
     buf[len] = 0;
-    sprintf(buf, "%s%s%s", root, package, path);
     LOGD("apk lib path: %s", buf);
-    free(package);
+//    free(package);
 
     return buf;
 }
@@ -228,6 +245,8 @@ int CreateDir(const char *pDir) {
         LOGD("%s is exists", pDir);
         return 0;
     }
+
+    LOGD("pDir len: %d", strlen(pDir));
 
     pszDir = strdup(pDir);
     iLen = strlen(pszDir);
@@ -264,10 +283,10 @@ char* GetLibFileName(const char *libFullName) {
         if(libFullName[i] == '/') {
             int size = len - i;
             char *fileName = (char *) malloc(size + 1);
-            fileName[size] = 0;
             char *nameStart = (char *) &libFullName[i + 1];
             memcpy(fileName, nameStart, size);
             LOGD("lib file name: %s", fileName);
+            fileName[size] = 0;
             return fileName;
         }
     }
@@ -310,7 +329,7 @@ int ExtractFileInZip(unzFile uf, const char *destFile, unz_file_info64 file_info
     if (fout != NULL) {
         do {
             status = unzReadCurrentFile(uf, buf, size_buf);
-            LOGD("read zip file status: %d", status);
+//            LOGD("read zip file status: %d", status);
             if (status <= 0) break;
             if (fwrite(buf, status, 1, fout) != 1) {
                 status = UNZ_ERRNO;
@@ -379,9 +398,9 @@ void CopyApkLib(JNIEnv *env, const char *apkFileName, const char *apkLibPath) {
             char *fileName = GetLibFileName(filename_in_zip);
             int len = strlen(fileName) + strlen(apkLibPath);
             char *libFileFullPath = (char *) malloc(len + 1);
-            libFileFullPath[len] = 0;
             strcpy(libFileFullPath, apkLibPath);
             strcat(libFileFullPath, fileName);
+            libFileFullPath[len] = 0;
             LOGD("extract lib file full path: %s", libFileFullPath);
 
             if(access(libFileFullPath, 0) == 0) {
@@ -502,11 +521,21 @@ char* getSourceApkFilePath(JNIEnv *env, jobject app) {
     jfieldID sourDirId = env->GetFieldID(clsAppInfo, "sourceDir", "Ljava/lang/String;");
     jstring sourceDir = (jstring) env->GetObjectField(applicationInfo, sourDirId);
 
-    return Jstring2CStr(env, sourceDir);
+//    return Jstring2CStr(env, sourceDir);
+    return (char *) env->GetStringUTFChars(sourceDir, false);
 }
 
 void UNZipDexFile(JNIEnv *env, const char *dexFilePath, jobject app) {
-    char *sourceApkFile = getSourceApkFilePath(env, app);
+
+    jclass clsApplication = env->FindClass("android/app/Application");
+    jmethodID getApplicationInfo = env->GetMethodID(clsApplication, "getApplicationInfo", "()Landroid/content/pm/ApplicationInfo;");
+    jobject applicationInfo = env->CallObjectMethod(app, getApplicationInfo);
+
+    jclass clsAppInfo = env->FindClass("android/content/pm/ApplicationInfo");
+    jfieldID sourDirId = env->GetFieldID(clsAppInfo, "sourceDir", "Ljava/lang/String;");
+    jstring sourceDir = (jstring) env->GetObjectField(applicationInfo, sourDirId);
+
+    char *sourceApkFile = (char *) env->GetStringUTFChars(sourceDir, false);
     LOGD("source apk file: %s", sourceApkFile);
     unz_file_info64 file_info = { 0 };
     int status;
@@ -515,7 +544,8 @@ void UNZipDexFile(JNIEnv *env, const char *dexFilePath, jobject app) {
     unzFile uf = unzOpen64(sourceApkFile);
     if(uf == NULL) {
         LOGD("open zip file failed.");
-        free(sourceApkFile);
+//        free(sourceApkFile);
+        env->ReleaseStringUTFChars(sourceDir, sourceApkFile);
         return;
     }
 
@@ -524,7 +554,8 @@ void UNZipDexFile(JNIEnv *env, const char *dexFilePath, jobject app) {
         if(status != UNZ_OK) {
             LOGD("unzip file failed.");
             unzClose(uf);
-            free(sourceApkFile);
+//            free(sourceApkFile);
+            env->ReleaseStringUTFChars(sourceDir, sourceApkFile);
             return;
         }
 
@@ -535,7 +566,8 @@ void UNZipDexFile(JNIEnv *env, const char *dexFilePath, jobject app) {
             if(dexFile == NULL) {
                 LOGD("open dex file failed, file path: %s, err: %s", dexFilePath, strerror(errno));
                 unzClose(uf);
-                free(sourceApkFile);
+//                free(sourceApkFile);
+                env->ReleaseStringUTFChars(sourceDir, sourceApkFile);
                 return;
             }
 
@@ -559,13 +591,15 @@ void UNZipDexFile(JNIEnv *env, const char *dexFilePath, jobject app) {
         if(ret != UNZ_OK) {
             LOGD("go to file end.");
             unzClose(uf);
-            free(sourceApkFile);
+//            free(sourceApkFile);
+            env->ReleaseStringUTFChars(sourceDir, sourceApkFile);
             return;
         }
     }
 
     unzClose(uf);
-    free(sourceApkFile);
+    env->ReleaseStringUTFChars(sourceDir, sourceApkFile);
+//    free(sourceApkFile);
 }
 
 int GetApkFileLength(const char *dexFilePath) {
@@ -712,9 +746,14 @@ void LoadResource(JNIEnv *env, jstring apkFileName) {
 }
 
 jobject Java_com_jd_apploader_App_onAppAttach(JNIEnv *env, jobject thiz, jobject app, jstring appName) {
-    char *apkFilePath = GetApkFilePath(env, app);
-    char *apkLibPath = GetApkLibPath(env, app);
-    char *apkFileName = GetApkFileName(apkFilePath);
+    InitPackageName(env, app);
+    apkFilePath = GetApkFilePath(env, app);
+    apkLibPath = GetApkLibPath(env, app);
+    apkFileName = GetApkFileName(apkFilePath);
+
+    LOGD("apkFilePath: %s", apkFilePath);
+    LOGD("apkLibPath: %s", apkLibPath);
+    LOGD("apkFileName: %s", apkFileName);
 
     bool ret = CopyApkFile(env, apkFileName, apkFilePath, apkLibPath, app);
     if(!ret) {
@@ -740,7 +779,7 @@ jobject Java_com_jd_apploader_App_onAppAttach(JNIEnv *env, jobject thiz, jobject
 
     jclass mapCls = env->FindClass("java/util/Map");
     jmethodID getId = env->GetMethodID(mapCls, "get", "(Ljava/lang/Object;)Ljava/lang/Object;");
-    jobject  wr = env->CallObjectMethod(mPackages, getId, GetPackageName(env, app));
+    jobject  wr = env->CallObjectMethod(mPackages, getId, jPackageName);
 
     jclass wrclass = env->FindClass("java/lang/ref/WeakReference");
     jmethodID methodGet = env->GetMethodID(wrclass, "get", "()Ljava/lang/Object;");
@@ -761,7 +800,8 @@ jobject Java_com_jd_apploader_App_onAppAttach(JNIEnv *env, jobject thiz, jobject
 
     jfieldID resDirId = env->GetFieldID(clsApkLoader, "mResDir", "Ljava/lang/String;");
     jstring resDir = (jstring) env->GetObjectField(objApkLoader, resDirId);
-    LOGD("res dir: %s", Jstring2CStr(env, resDir));
+//    LOGD("res dir: %s", Jstring2CStr(env, resDir));
+//    LOGD("res dir: %s", env->GetStringUTFChars(resDir, false));
     env->SetObjectField(objApkLoader, resDirId, strApkFileName);
 //
 //    jfieldID mResource = env->GetFieldID(clsApkLoader, "mResources", "Landroid/content/res/Resources;");
@@ -780,13 +820,23 @@ jobject Java_com_jd_apploader_App_onAppAttach(JNIEnv *env, jobject thiz, jobject
 
     jobject gameApp = NULL;
     if(appName != NULL) {
-        LOGE("app name: %s", Jstring2CStr(env, appName));
+//        LOGE("app name: %s", Jstring2CStr(env, appName));
+//        LOGE("app name: %s", env->GetStringUTFChars(appName, false));
         gameApp = createGameApplication(env, appName, strApkFileName);
     }
 
-    free(apkFilePath);
-    free(apkLibPath);
-    free(apkFileName);
+//    if(apkFilePath != NULL) {
+//        free(apkFilePath);
+//        apkFilePath = NULL;
+//    }
+//    if(apkLibPath != NULL) {
+//        free(apkLibPath);
+//        apkLibPath = NULL;
+//    }
+//    if(apkFileName != NULL) {
+//        free(apkFileName);
+//        apkFileName = NULL;
+//    }
 
     LOGE("onAppAttach finish, return game application object");
 

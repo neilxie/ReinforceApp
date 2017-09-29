@@ -18,6 +18,12 @@ extern "C" {
 //#define LOGE(...)
 const int MAX_FILENAME_LEN = 256;
 
+char *packageName;
+jstring jPackageName;
+char *apkFilePath;
+char *apkLibPath;
+char *apkFileName;
+
 char *GetApkFilePath(JNIEnv *env, jobject app);
 char *GetApkFileName(const char *apkFilePath);
 char* Jstring2CStr(JNIEnv *env, jstring jstr);
